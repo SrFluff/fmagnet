@@ -1,0 +1,76 @@
+#!/bin/python3
+import zipF
+import sys
+import os
+
+sys.argv.pop(0)
+args = sys.argv
+
+if len(args) == 0 or "--help" in args:
+    print("Usage: fmg [keyword] [.fmagent file]")
+    print()
+    print("Keywords")
+    print("download - Downloads the specified file")
+    print("preview  - Show filename and link")
+    print("generate - generate a new fmagnet file")
+    print()
+    sys.exit()
+
+if args[0] == "preview":
+    data = zipF.read(args[1],"root.fm")
+
+    link = ""
+    file = ""
+    ytd = False
+
+    for i in data:
+        b = i.split()
+        if b[0] == "L":
+            link = b[1]
+        if b[0] == "F":
+            file = i[2:]
+        if b[0] == "Y":
+            ytd = True
+
+    print(f"{'-' * (len(link) + 7)}")
+    print(" Preview")
+    print(f"{'-' * (len(link) + 7)}")
+    print(" File:   " + file)
+    print(" Link:   " + link)
+    print(" YT-DLP: " + str(ytd).lower())
+    exit()
+
+elif args[0] == "download":
+    link = ""
+    file = ""
+    data = zipF.read(args[1],"root.fm")
+    ytd = False
+    for i in data:
+        b = i.split()
+        if b[0] == "L":
+            link = b[1]
+        elif b[0] == "F":
+            file = i[2:]
+        elif b[0] == "Y":
+            ytd = True
+
+    if not ytd:
+        os.system("curl '" + link + "' > '" + file + "'")
+    else:
+        print("Downloading...")
+        os.system("yt-dlp -q --no-warnings -q --no-progress -q --no-update -o '" + file  + "' -f b[ext=mp4] --js-runtime node '" + link + "'")
+
+elif args[0] == "generate":
+    name = args[1][0:-8]
+    file = input("File name: ")
+    link = input("Link: ")
+    yt = input("Use yt-dlp[y/N]: ")
+    f = open("root.fm","w")
+    f.write("L " + link + "\n")
+    f.write("F " + file + "\n")
+    if yt.lower() == "y":
+        f.write("Y\n")
+    f.close()
+    os.system("zip " + name + ".zip root.fm")
+    os.remove("root.fm")
+    os.system("mv " + name + ".zip " + name + ".fmagnet")
