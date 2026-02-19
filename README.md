@@ -4,7 +4,7 @@
 
 *"A worse torrent file, that isn't a torrent file at all."*
 
-An fmagnet file contains three things:\
+An fmagnet file contains three things:
 - The file name
 - The link to that file
 - Whether or not to use yt-dlp to download the file
